@@ -19,16 +19,32 @@ const getSearchQueries = async (selectedText: string): Promise<any> => {
         throw error;
     }
 };
-
+const getCitationFromURL = async (citeURL: string): Promise<any> => {
+    try {
+        const urlWithApiKey = `${citeURL}&api_key=${API_KEY}`;
+        console.log(urlWithApiKey)
+        const response = await fetch(urlWithApiKey);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching citation:", error);
+        throw error;
+    }
+};
 
 export const appRouter = router({
     test: publicProcedure.query(()=>{
         return 'HELLO FROM API'
     }),
     searchQuery: publicProcedure.input(z.object({query:z.string()})).mutation(async({ctx,input}) => {
-        // Call the getCitation function with the selected text
-        const searchQueries = getSearchQueries(input.query);
+        const searchQueries = await getSearchQueries(input.query);
         return {searchQueries:searchQueries}; // Return some response indicating the request is sent
+    }),
+    searchCitation: publicProcedure.input(z.object({citeURL:z.string()})).mutation(async({input})=>{
+        const citationData = await getCitationFromURL(input.citeURL);
+        return {citationData:citationData.citations}; // Return citation data
     })
 });
  
