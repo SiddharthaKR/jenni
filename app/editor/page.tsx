@@ -127,7 +127,7 @@ const page = () => {
             description={form.watch("description")}
             onChange={handleTipTapChange}
           />
-          {searchResult.length > 0 &&
+          {searchResult?.length > 0 &&
             searchResult.map((result, index) => (
               <SearchQueryBlock
                 onClick={() =>
@@ -145,7 +145,7 @@ const page = () => {
               />
             ))}
           {
-              citationData.length > 0 && 
+              citationData?.length > 0 && 
               citationData.map((data, index) => (
                 <div key={index}>
                   <h3>{data[selectedCitationStyle].title}</h3>
