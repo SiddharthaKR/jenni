@@ -23,10 +23,10 @@ const page = () => {
       form.setValue('description', richText);
     };
      // Define the citation mutation
-     const { mutate: generateCitation } =
-    trpc.citation.useMutation({
-      onSuccess: () => {
-        console.log('generated')
+    const { mutate: generateCitation } =
+    trpc.searchQuery.useMutation({
+      onSuccess: ({searchQueries}) => {
+        console.log(searchQueries)
         // utils.getUserFiles.invalidate()
       },
       // onMutate({ query }) {
