@@ -24,8 +24,9 @@ interface CitationData {
 const page = () => {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
   const [citationData, setCitationData] = useState<CitationData[][]>([]);
-  const [selectedCitationStyle, setSelectedCitationStyle] =
-    useState<number>(0); // Default to MLA
+  const [selectedCitationStyle, setSelectedCitationStyle] = useState<number>(0); // Default to MLA
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [citationLoading, setCitationLoading] = useState(false);
   const citationStyles = {
     MLA: 0,
     APA: 1,
@@ -50,48 +51,41 @@ const page = () => {
   };
   const { mutate: generateCitation } = trpc.searchCitation.useMutation({
     onSuccess: ({ citationData }) => {
-      // setSearchResult(searchQueries);
       console.log(citationData);
       setCitationData((prevData) => [...prevData, citationData]);
       setSearchResult([])
-      // utils.getUserFiles.invalidate()
     },
-    // onMutate({ query }) {
-    //   setCurrentlyDeletingFile(id)
-    // },
-    // onSettled() {
-    //   setCurrentlyDeletingFile(null)
-    // },
+    onMutate() {
+      setCitationLoading(true)
+    },
+    onSettled() {
+      setCitationLoading(false)
+    },
   });
   const { mutate: generateSearchResults } = trpc.searchQuery.useMutation({
     onSuccess: ({ searchQueries }) => {
       setSearchResult(searchQueries);
       console.log(searchQueries);
-      // utils.getUserFiles.invalidate()
     },
-    // onMutate({ query }) {
-    //   setCurrentlyDeletingFile(id)
-    // },
-    // onSettled() {
-    //   setCurrentlyDeletingFile(null)
-    // },
+    onMutate() {
+      setSearchLoading(true);
+    },
+    onSettled() {
+      setSearchLoading(false);
+    },
   });
   const handleSelectCitationClick = async (citeLink: string) => {
     try {
       const citationData = generateCitation({ citeURL: citeLink });
       console.log("Citation Data:", citationData);
-      // setSearchResult(SearchResult[]:[])
-      // setSelectedCitation(citationData.citations[0]);
     } catch (error) {
       console.error("Error fetching citation:", error);
     }
   };
-
   const handleSearchQueryClick = async () => {
     const selectedText = window.getSelection()?.toString().trim(); // Get the selected text from the description field
     if (selectedText) {
       try {
-        // Perform the citation request using the citation mutation
         generateSearchResults({ query: selectedText });
       } catch (error) {
         console.error("Citation request failed:", error);
@@ -130,7 +124,37 @@ const page = () => {
             description={form.watch("description")}
             onChange={handleTipTapChange}
           />
-          {searchResult?.length > 0 &&
+          {searchLoading ? (
+          <span>Loading search results...</span>
+        ) : (
+          searchResult?.length > 0 &&
+          searchResult.map((result, index) => (
+            <SearchQueryBlock
+              onClick={() =>
+                handleSelectCitationClick(result.inline_links.serpapi_cite_link)
+              }
+              key={index}
+              title={result.title}
+              snippet={result.snippet}
+              summary={result.publication_info.summary}
+              fileFormat={result.file_format}
+              resourcesTitle={result.resources_title}
+              serpapiCiteLink={result.inline_links.serpapi_cite_link}
+            />
+          ))
+        )}
+        {citationLoading ? (
+          <span>Loading citation...</span>
+        ) : (
+          citationData?.length > 0 &&
+          citationData.map((data, index) => (
+            <div key={index}>
+              <h3>{data[selectedCitationStyle].title}</h3>
+              <p>{data[selectedCitationStyle].snippet}</p>
+            </div>
+          ))
+        )}
+          {/* {searchResult?.length > 0 &&
             searchResult.map((result, index) => (
               <SearchQueryBlock
                 onClick={() =>
@@ -155,13 +179,13 @@ const page = () => {
                   <p>{data[selectedCitationStyle].snippet}</p>
                 </div>
               ))
-            }
+            } */}
           {form.formState.errors.description && (
             <span>{form.formState.errors.description.message}</span>
           )}
         </div>
         <div className="w-full flex my-2 justify-center align-middle">
-        <button className="border-1 bg-black text-white shadow-md px-4 py-2" type="button" onClick={handleSearchQueryClick}>
+        <button disabled={searchLoading || citationLoading || searchResult.length>0 } className="border-1 bg-black text-white shadow-md px-4 py-2" type="button" onClick={handleSearchQueryClick}>
           Cite
         </button>
         </div>

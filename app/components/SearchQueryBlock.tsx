@@ -12,7 +12,7 @@ interface SearchQueryBlockProps {
 
 const SearchQueryBlock: React.FC<SearchQueryBlockProps> = ({ title='', snippet='', summary='', fileFormat='', resourcesTitle='', serpapiCiteLink='',onClick }) => {
   return (
-    <div onClick={onClick} className='shadow-lg'>
+    <div onClick={onClick} className='shadow-lg px-4 py-2 my-4 mx-2 cursor-pointer'>
       <h3>{title}</h3>
       <p>{snippet}</p>
       <p>Summary: {summary}</p>
