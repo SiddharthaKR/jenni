@@ -104,10 +104,12 @@ const page = () => {
     setSelectedCitationStyle(Number(event.target.value));
   };
   return (
-    <div>
+    <div className="p-6">
       <form>
         <div>
-          <div>
+          <div className="flex justify-between">
+          <label htmlFor="description">Enter Text:</label>
+            <div>
             <label htmlFor="citationStyle">Citation Style:</label>
             <select
               id="citationStyle"
@@ -121,8 +123,9 @@ const page = () => {
               <option value="4">Vancouver</option>
               {/* Add more citation styles as needed */}
             </select>
+            </div>
           </div>
-          <label htmlFor="description">Description:</label>
+          
           <TipTap
             description={form.watch("description")}
             onChange={handleTipTapChange}
@@ -157,9 +160,12 @@ const page = () => {
             <span>{form.formState.errors.description.message}</span>
           )}
         </div>
-        <button type="button" onClick={handleSearchQueryClick}>
+        <div className="w-full flex my-2 justify-center align-middle">
+        <button className="border-1 bg-black text-white shadow-md px-4 py-2" type="button" onClick={handleSearchQueryClick}>
           Cite
         </button>
+        </div>
+        
         {/* {isCiting && <span>Loading citation...</span>} */}
       </form>
     </div>

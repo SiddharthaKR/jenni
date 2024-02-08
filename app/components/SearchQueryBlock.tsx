@@ -16,9 +16,9 @@ const SearchQueryBlock: React.FC<SearchQueryBlockProps> = ({ title='', snippet='
       <h3>{title}</h3>
       <p>{snippet}</p>
       <p>Summary: {summary}</p>
-      <p>File Format: {fileFormat}</p>
+      {/* <p>File Format: {fileFormat}</p>
       <p>Resources Title: {resourcesTitle}</p>
-      <p>Cite Link: <a href={serpapiCiteLink}>{serpapiCiteLink}</a></p>
+      <p>Cite Link: <a href={serpapiCiteLink}>{serpapiCiteLink}</a></p> */}
     </div>
   );
 };
