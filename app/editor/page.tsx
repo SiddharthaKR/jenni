@@ -18,21 +18,22 @@ interface SearchResult {
   inline_links: { serpapi_cite_link: string };
 }
 interface CitationData {
-  title: string,
-  snippet: string
+  title: string;
+  snippet: string;
 }
 const page = () => {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
-  const [citationData, setcitationData] = useState<CitationData[]>([]);
-  const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>("MLA"); // Default to MLA
-  const citationStyleMap: { [style: string]: number } = {
+  const [citationData, setCitationData] = useState<CitationData[][]>([]);
+  const [selectedCitationStyle, setSelectedCitationStyle] =
+    useState<number>(0); // Default to MLA
+  const citationStyles = {
     MLA: 0,
-    Harvard: 1,
-    APA: 2,
+    APA: 1,
+    Harvard: 2,
     Chicago: 3,
     Vancouver: 4,
-    // Add more citation styles as needed
   };
+
   const formSchema = z.object({
     title: z.string().min(5, { message: "not long" }),
     description: z.string().min(5, { message: "not long" }),
@@ -51,7 +52,8 @@ const page = () => {
     onSuccess: ({ citationData }) => {
       // setSearchResult(searchQueries);
       console.log(citationData);
-      setcitationData(citationData)
+      setCitationData((prevData) => [...prevData, citationData]);
+      setSearchResult([])
       // utils.getUserFiles.invalidate()
     },
     // onMutate({ query }) {
@@ -90,31 +92,36 @@ const page = () => {
     if (selectedText) {
       try {
         // Perform the citation request using the citation mutation
-         generateSearchResults({ query: selectedText });
+        generateSearchResults({ query: selectedText });
       } catch (error) {
         console.error("Citation request failed:", error);
       }
     }
   };
-  const handleCitationStyleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCitationStyle(event.target.value);
+  const handleCitationStyleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedCitationStyle(Number(event.target.value));
   };
   return (
     <div>
       <form>
         <div>
-        <div>
-          <label htmlFor="citationStyle">Citation Style:</label>
-          <select id="citationStyle" value={selectedCitationStyle} onChange={handleCitationStyleChange}>
-            <option value="MLA">MLA</option>
-            <option value="Harvard">Harvard</option>
-            <option value="APA">APA</option>
-            <option value="APA">Chicago</option>
-            <option value="APA">Harvard</option>
-            <option value="APA">Vancouver</option>
-            {/* Add more citation styles as needed */}
-          </select>
-        </div>
+          <div>
+            <label htmlFor="citationStyle">Citation Style:</label>
+            <select
+              id="citationStyle"
+              value={selectedCitationStyle}
+              onChange={handleCitationStyleChange}
+            >
+              <option value="0">MLA</option>
+              <option value="1">APA</option>
+              <option value="2">Chicago</option>
+              <option value="3">Harvard</option>
+              <option value="4">Vancouver</option>
+              {/* Add more citation styles as needed */}
+            </select>
+          </div>
           <label htmlFor="description">Description:</label>
           <TipTap
             description={form.watch("description")}
@@ -123,7 +130,11 @@ const page = () => {
           {searchResult.length > 0 &&
             searchResult.map((result, index) => (
               <SearchQueryBlock
-                onClick={()=>handleSelectCitationClick(result.inline_links.serpapi_cite_link)}
+                onClick={() =>
+                  handleSelectCitationClick(
+                    result.inline_links.serpapi_cite_link
+                  )
+                }
                 key={index}
                 title={result.title}
                 snippet={result.snippet}
@@ -133,10 +144,15 @@ const page = () => {
                 serpapiCiteLink={result.inline_links.serpapi_cite_link}
               />
             ))}
-            {/* {
+          {
               citationData.length > 0 && 
-               
-            } */}
+              citationData.map((data, index) => (
+                <div key={index}>
+                  <h3>{data[selectedCitationStyle].title}</h3>
+                  <p>{data[selectedCitationStyle].snippet}</p>
+                </div>
+              ))
+            }
           {form.formState.errors.description && (
             <span>{form.formState.errors.description.message}</span>
           )}
